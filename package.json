@@ -1,0 +1,16 @@
+{
+  "name": "cloud-project-variant-5",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Практикалық жұмыс №5: қойманы басқару веб-жобасы",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  }
+}
