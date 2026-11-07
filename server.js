@@ -32,7 +32,10 @@ const items = [
 ];
 
 app.get('/', (req, res) => {
-  res.send('Қойма жүйесі жұмыс істеп тұр.');
+  res.send(`
+    <h1>Қойма жүйесі жұмыс істеп тұр.</h1>
+    <a href="/items" style="font-size: 20px; color: blue; text-decoration: underline;">Тауарлар тізімін көру (/items)</a>
+  `);
 });
 
 app.get('/info', (req, res) => {
