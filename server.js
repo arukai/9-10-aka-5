@@ -1,40 +1,22 @@
 const express = require('express');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const STUDENT_VARIANT = process.env.STUDENT_VARIANT || '5';
 
-const items = [
-  {
-    id: 1,
-    name: 'Ноутбук',
-    category: 'Электроника',
-    quantity: 12,
-    unit: 'дана',
-    location: 'A-01',
-  },
-  {
-    id: 2,
-    name: 'Кеңсе қағазы',
-    category: 'Кеңсе тауарлары',
-    quantity: 45,
-    unit: 'қаптама',
-    location: 'B-03',
-  },
-  {
-    id: 3,
-    name: 'Пернетақта',
-    category: 'Компьютер жабдықтары',
-    quantity: 20,
-    unit: 'дана',
-    location: 'A-04',
-  },
-];
+// Деректер қорына қосылу баптаулары
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send(`
     <h1>Қойма жүйесі жұмыс істеп тұр.</h1>
-    <a href="/items" style="font-size: 20px; color: blue; text-decoration: underline;">Тауарлар тізімін көру (/items)</a>
+    <a href="/api/items" style="font-size: 20px; color: blue; text-decoration: underline;">Тауарлар тізімін көру (/api/items)</a>
   `);
 });
 
@@ -46,8 +28,40 @@ app.get('/info', (req, res) => {
   });
 });
 
-app.get('/items', (req, res) => {
-  res.json(items);
+// --- REST API МАРШРУТТАРЫ ---
+
+// 1. Барлық тауарларды оқу (GET)
+app.get('/api/items', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM items ORDER BY id');
+    res.json(r.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Бір тауарды id бойынша оқу (GET)
+app.get('/api/items/:id', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM items WHERE id=$1', [req.params.id]);
+    res.json(r.rows[0] || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Жаңа тауар қосу (POST)
+app.post('/api/items', async (req, res) => {
+  try {
+    const { name, quantity } = req.body;
+    const r = await pool.query(
+      'INSERT INTO items (name, quantity) VALUES ($1, $2) RETURNING *',
+      [name, quantity]
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(PORT, () => {
