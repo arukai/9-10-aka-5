@@ -5,8 +5,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const STUDENT_VARIANT = process.env.STUDENT_VARIANT || '5';
 
+// Деректер қорына қосылу баптаулары (Сілтеме тікелей қосылды)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL || 'postgresql://db_5_aalo_user:ajeT0NwqOhJM7JHH4V0f9MZE8QBVhSue@dpg-dbnghflg1s2s73cl3lh0-a.virginia-postgres.render.com/db_5_aalo',
   ssl: { rejectUnauthorized: false }
 });
 
@@ -34,8 +35,8 @@ app.get('/api/items', async (req, res) => {
     const r = await pool.query('SELECT * FROM items ORDER BY id');
     res.json(r.rows);
   } catch (err) {
-    console.error('--- ДЕРЕКТЕР ҚОРЫҚА ҚОСЫЛУ ҚАТЕСІ ---', err); // Логқа шығару
-    res.status(500).json({ error: String(err) }); // Экранға толық шығару
+    console.error('--- ДЕРЕКТЕР ҚОРЫҚА ҚОСЫЛУ ҚАТЕСІ ---', err); 
+    res.status(500).json({ error: String(err) }); 
   }
 });
 
