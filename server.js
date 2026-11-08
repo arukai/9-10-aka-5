@@ -5,7 +5,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const STUDENT_VARIANT = process.env.STUDENT_VARIANT || '5';
 
-// Деректер қорына қосылу баптаулары
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -30,27 +29,26 @@ app.get('/info', (req, res) => {
 
 // --- REST API МАРШРУТТАРЫ ---
 
-// 1. Барлық тауарларды оқу (GET)
 app.get('/api/items', async (req, res) => {
   try {
     const r = await pool.query('SELECT * FROM items ORDER BY id');
     res.json(r.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('--- ДЕРЕКТЕР ҚОРЫҚА ҚОСЫЛУ ҚАТЕСІ ---', err); // Логқа шығару
+    res.status(500).json({ error: String(err) }); // Экранға толық шығару
   }
 });
 
-// 2. Бір тауарды id бойынша оқу (GET)
 app.get('/api/items/:id', async (req, res) => {
   try {
     const r = await pool.query('SELECT * FROM items WHERE id=$1', [req.params.id]);
     res.json(r.rows[0] || null);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: String(err) });
   }
 });
 
-// 3. Жаңа тауар қосу (POST)
 app.post('/api/items', async (req, res) => {
   try {
     const { name, quantity } = req.body;
@@ -60,7 +58,8 @@ app.post('/api/items', async (req, res) => {
     );
     res.status(201).json(r.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: String(err) });
   }
 });
 
